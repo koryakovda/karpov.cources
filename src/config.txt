@@ -1,0 +1,5 @@
+username=robot-startml-ro
+password=pheiph0hahj1Vaif
+host=postgres.lab.karpov.courses
+port=6432
+database=startml
