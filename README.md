@@ -4,22 +4,32 @@
 
 ## Описание проекта
 
-Целью этого проекта было создание готового сервиса на FAST API, способного предлагать персонализированные рекомендации постов на основе предпочтений пользователей с использованием 2х различных моделей в условной социальной сети.
+Целью этого проекта было создание готового сервиса рекомендательных систем на FAST API, способного предлагать персонализированные рекомендации постов на основе предпочтений пользователей с использованием 2х различных моделей в условной социальной сети.
 
 ## Структура:
 
 ```buildoutcfg
-|   README.md                             Файл с описанием проекта
-|   requirements.txt                      Файл для настройки окружения
-|   kc-fin-project-catboost.ipynb         Ноутбук с первой моделью
-|   kc-fin-project-nn-catboost.ipynb      Ноутбук со второй моделью
-├───service                               Готовый сервис в который входит python-файл и 2 модели
-│       app.py
-│       model_control
-│       model_test    
-└───draft jupyter                        Черновики который использовались для финальных ноутбуков                 
-        final-project-with-tfidf.ipynb
-        final-project-with-transformer.ipynb
+|   README.md                                  Файл с описанием проекта
+|   requirements.txt                           Файл для настройки окружения
+|   docker-compose.yaml                        Docker-compose файл для поднятия контейнера
+|   Dockerfile                                 Dockerfile для создания образа
+|   .dockerignore     
+|   .gitignore
+├───src                                        Готовый сервис
+│       app.py                                 Приложение
+│       model_control                          Модель контрольная
+│       model_test                             Модель тестовая
+│       config.txt                             Конфиг файл БД
+│       schema.py                              Классы по которым валидировали выходы функция
+│       __init__.py
+│       request_examples.txt                   Примеры запросов
+└───notebooks                                  Ноутбуки с обучением моделей
+    ├───kc-fin-project-catboost.ipynb          Ноутбук с первой моделью
+    ├───kc-fin-project-nn-catboost.ipynb       Ноутбук со второй моделью
+    └───draft jupyter                          Черновики, используемые для финальных ноутбуков
+        ├───kc-fin-project-catboost.ipynb      Черновики с первой моделью
+        └───kc-fin-project-nn-catboost.ipynb   Черновики со второй моделью
+
 ```
 ### Исходные данные
 ##### Пользователи сервиса
@@ -54,16 +64,13 @@
 Количество записей: ~77 миллионов
 
 ##### Параметры запроса
-user_id указывать в пределах от 200 до 168552, при этом около 5000 id не занято, при вводе несуществующего польлзователя получаем ошибку (так сделано осознанно т.к. по условию задания у нас нет новых пользователей, база неизменна, поэтому выдавать 'среднего' пользователя при отсутствии в базе user_id я не стал)
+user_id указывать в пределах от 200 до 168552, при этом около 5000 id не занято, при вводе несуществующего польлзователя получаем ошибку (так сделано осознанно т.к. по условию задания 
+у нас нет новых пользователей, база неизменна, поэтому выдавать 'среднего' пользователя при отсутствии в базе user_id я не стал)
 
 request_time указывать в пределах от 1.10.2021 до 29.12.2021 -
 это тоже одно из принятых допущений задания
 
-{
-  "user_id": 200,
-  "request_time": "2021-10-01T00:00:00",
-  "posts_limit": 5
-}
+Подробнее как делать запрос описано в [файле](request_examples.txt).
 
 | Поле         | Описание                  |
 |--------------|---------------------------|
@@ -125,18 +132,19 @@ request_time указывать в пределах от 1.10.2021 до 29.12.20
 5. Применить нейронные сети в качестве модели рекомендаций.
 
 ## Инструкция для запуска
-`git clone https://github.com/koryakovda/Rec_sys_final_project.git` <br />
-`cd ./Rec_sys_final_project/Rec_sys_final_project` <br />
-`python.exe -m pip install --upgrade pip` <br />
-`pip install -r requirements.txt` <br />
-`python.exe -m uvicorn app:app` <br />
 
-## Примечание
-Не забудьте поменять в сервие app путь к папке с моделью:
-def get_model_path(model_version: str) -> str:
-    
-    ......
-        model_path = (
-            f"C:/Users/korya/PycharmProjects/pythonProject/KC_fin_project/git/model_{model_version}"
-        )
-    return model_path
+#### Способ 1 (GitHub)
+`git clone https://github.com/koryakovda/karpov.cources.git` <br />
+`python -m pip install --upgrade pip` <br />
+`pip install -r requirements.txt` <br />
+`python -m uvicorn src.app:app ` <br />
+
+#### Способ 2 (Docker-compose)
+`git clone https://github.com/koryakovda/karpov.cources.git` <br />
+`docker-compose up -d`
+
+#### Способ 3 (DockerHub)
+`docker pull koryakovda/posts_service` <br />
+`docker run --rm -p 8000:8000 --name <имя_образа> koryakovda/posts_service`
+
+Сервис доступен по http://127.0.0.1:8000/post/recommendations/, где задав параметры можно протестировать запрос на выдачу ленты. Примеры запросов есть [здесь](request_examples.txt).
